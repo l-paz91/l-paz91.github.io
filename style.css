@@ -4,6 +4,10 @@ body {
     font-family: 'Lora', serif;
 }
 
+li {
+    margin-bottom: 10px; /* Add space between list items */
+}
+
 a {
     color: #bb86fc; /* Light purple for links */
 }
@@ -14,4 +18,5 @@ a:hover {
 
 li span {
     color: #ccc; /* Lighter color for descriptions */
+    font-size: smaller;
 }
