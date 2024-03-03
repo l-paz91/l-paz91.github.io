@@ -1,0 +1,13 @@
+body {
+    background-color: #121212; /* Dark background */
+    color: #e0e0e0; /* Light text */
+    font-family: Arial, sans-serif;
+}
+
+a {
+    color: #bb86fc; /* Light purple for links */
+}
+
+a:hover {
+    color: #3700B3; /* Darker purple for hover effect */
+}
