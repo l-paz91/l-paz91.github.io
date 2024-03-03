@@ -11,3 +11,7 @@ a {
 a:hover {
     color: #3700B3; /* Darker purple for hover effect */
 }
+
+li span {
+    color: #ccc; /* Lighter color for descriptions */
+}
