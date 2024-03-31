@@ -32,10 +32,10 @@ const challenges = [
 
 // Insight or lesson learned
 const insights = [
-    "but then I realized that every failure is a stepping stone to success.",
-    "and it hit me: true innovation requires stepping out of your comfort zone.",
-    "which taught me the importance of resilience in the face of adversity.",
-    "reminding me that patience and persistence often pay off in the end.",
+    "but then I realized that every failure is a stepping stone to success.\n\n",
+    "and it hit me: true innovation requires stepping out of your comfort zone.\n\n",
+    "which taught me the importance of resilience in the face of adversity.\n\n",
+    "reminding me that patience and persistence often pay off in the end.\n\n",
 ];
 
 /* ----------------------------------------------------------------------------------- */
@@ -50,6 +50,17 @@ const closings = [
 
 /* ----------------------------------------------------------------------------------- */
 
+// hashtag and emoji
+const hashtags = [
+    "\n#MondayMotivation #CareerGrowth #Innovation 🔥🙌💹",
+    "\n#GrowthMindset #Innovation #Success 💪🚀🌟",
+    "\n#Resilience #Success #CareerJourney 🌈🚀🌟",
+    "\n#CareerGrowth #Innovation #Success 🚀🌟🙌",
+    "\n#bossbabe #CareerGrowth #Innovation 💅🚀🌟🙌",
+];
+
+/* ----------------------------------------------------------------------------------- */
+
 function getRandomElement(arr) 
 {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -59,7 +70,16 @@ function getRandomElement(arr)
 
 function generatePost() 
 {
-    const post = `${getRandomElement(openings)} ${getRandomElement(contexts)}, ${getRandomElement(challenges)}, ${getRandomElement(insights)} ${getRandomElement(closings)}`;
+    const opening = getRandomElement(openings);
+    const context = getRandomElement(contexts);
+    const challenge = getRandomElement(challenges);
+    const insight = getRandomElement(insights);
+    const closing = getRandomElement(closings);
+    const hashtag = getRandomElement(hashtags);
+
+    // Combine the random elements into a post
+    const post = `${opening} ${context}, ${challenge}, ${insight}${closing}${hashtag}`;
+
    // console.log(post); // Or display it in your HTML
    document.getElementById('post-content').innerText = post;
 }
