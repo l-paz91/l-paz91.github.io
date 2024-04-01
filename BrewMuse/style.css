@@ -1,0 +1,57 @@
+/* ----------------------------------------------------------------------------------- */
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lora', serif;
+    background-color: #917e68;
+}
+
+/* ----------------------------------------------------------------------------------- */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* ----------------------------------------------------------------------------------- */
+
+#generateButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #745335;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    font-family: 'Lora', serif;
+}
+
+/* ----------------------------------------------------------------------------------- */
+
+#generateButton:hover {
+    background-color: #5a3f2a;
+}
+
+/* ----------------------------------------------------------------------------------- */
+
+#coffeeOrderDisplay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    padding: 20px;
+    font-family: 'Lora', serif;
+    font-weight: bold;
+}
+
+/* ----------------------------------------------------------------------------------- */
+
+.lower-text {
+    margin-top: 20%; /* Adjust this value to create the amount of space you want */
+}
+
+/* ----------------------------------------------------------------------------------- */
