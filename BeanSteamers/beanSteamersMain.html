@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bean Steamers</title>
+    <link rel="stylesheet" href="beanSteamersStyle.css">
+</head>
+<body>
+    <h1>Bean Steamers</h1>
+    <h2> Orders: </h2>
+    <div class="orders-container"> 
+        <div class="order">
+            <h3>Order 1</h3>
+            <p>short cappucino</p>
+            <p>2 shots espresso</p>
+            <p>1 pump vanilla syrup</p>
+        </div>
+        <div class="order">
+            <h3>Order 2</h3>
+            <p>tall latte</p>
+            <p>3 shots espresso</p>
+        </div>
+        <div class="order">
+            <h3>Order 3</h3>
+            <p>grande americano</p>
+            <p>4 shots espresso</p>
+        </div>
+    </div>
+    <div class="game">
+        <div class="pullEspressoContainer">
+            <button id="pullEspressoBtn">Pull Espresso</button>
+            <div id="pullEspressoPercentageDone">0%</div>
+        </div>
+
+        <div class="steamMilkContainer">
+            <button id="steamMilkBtn">Steam Milk</button>
+            <div id="steamMilkPercentageDone">0%</div>
+        </div>
+        
+        <div class="foamMilkContainer">
+          <button id="foamMilkBtn">Foam Milk</button>
+          <div id="foamMilkPercentageDone">0%</div>  
+        </div>       
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

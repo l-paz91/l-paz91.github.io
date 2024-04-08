@@ -1,0 +1,73 @@
+/* ------------------------------------------------------------------------- */
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #c7bdac;
+    text-align: left;
+}
+
+/* ------------------------------------------------------------------------- */
+
+.orders-container {
+    display: flex;
+    flex-direction: row;
+
+}
+
+/* ------------------------------------------------------------------------- */
+
+.order {
+    margin: 20px;
+    padding: 20px;
+    background-color: #af9781;
+    border-radius: 10px;
+    width: 10%;
+}
+
+/* ------------------------------------------------------------------------- */
+
+#game {
+    margin: auto;
+    width: 80%;
+}
+
+/* ------------------------------------------------------------------------- */
+
+button {
+    background-color: #8d6e63;
+    color: white;
+    padding: 20px 40px;
+    margin: 20px 0;
+    border: none;
+    cursor: pointer;   
+    width: 10%; /* make the buttons the same size */
+}
+
+/* ------------------------------------------------------------------------- */
+
+button:hover {
+    background-color: #6d4c41;
+}
+
+/* ------------------------------------------------------------------------- */
+
+#pullEspressoPercentageDone {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+/* ------------------------------------------------------------------------- */
+
+#steamMilkPercentageDone {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+/* ------------------------------------------------------------------------- */
+
+#foamMilkPercentageDone {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+/* ------------------------------------------------------------------------- */
