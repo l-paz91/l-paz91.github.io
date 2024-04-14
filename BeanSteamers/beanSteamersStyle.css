@@ -26,9 +26,9 @@ body {
 
 /* ------------------------------------------------------------------------- */
 
-#game {
-    margin: auto;
-    width: 80%;
+.barista-machine-container {
+    width: 33%;
+    background-color: rgb(230, 226, 216);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -36,11 +36,11 @@ body {
 button {
     background-color: #8d6e63;
     color: white;
-    padding: 20px 40px;
-    margin: 20px 0;
+    padding: 20px 20px;
+    margin: 5px 20px;
     border: none;
     cursor: pointer;   
-    width: 10%; /* make the buttons the same size */
+    width: 30%; /* make the buttons the same size */
 }
 
 /* ------------------------------------------------------------------------- */
@@ -51,23 +51,91 @@ button:hover {
 
 /* ------------------------------------------------------------------------- */
 
-#pullEspressoPercentageDone {
+#pullEspressoAmount {
     display: inline-block;
     margin-left: 20px;
 }
 
 /* ------------------------------------------------------------------------- */
 
-#steamMilkPercentageDone {
-    display: inline-block;
-    margin-left: 20px;
+#addEspressoBtn {
+    float: right;
+    text-align: center;
+    margin-left: 50px;
+    width: 10%;
+    border-radius: 20px;
+    background-color: #8d7e79;
+}
+
+#addEspressoBtn:hover {
+    background-color: #6d4c41;
 }
 
 /* ------------------------------------------------------------------------- */
 
-#foamMilkPercentageDone {
+#steamMilkDone {
     display: inline-block;
     margin-left: 20px;
+}
+
+#addSteamMilkBtn {
+    float: right;
+    text-align: center;
+    margin-left: 50px;
+    width: 10%;
+    border-radius: 20px;
+    background-color: #8d7e79;
+}
+
+#addSteamMilkBtn:hover {
+    background-color: #6d4c41;
+}
+
+/* ------------------------------------------------------------------------- */
+
+#foamMilkDone {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+#addFoamMilkBtn {
+    float: right;
+    text-align: center;
+    margin-left: 50px;
+    width: 10%;
+    border-radius: 20px;
+    background-color: #8d7e79;
+}
+
+#addFoamMilkBtn:hover {
+    background-color: #6d4c41;
+}
+
+/* ------------------------------------------------------------------------- */
+
+#hotWaterDone {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+#addHotWaterBtn {
+    float: right;
+    text-align: center;
+    margin-left: 50px;
+    width: 10%;
+    border-radius: 20px;
+    background-color: #8d7e79;
+}
+
+#addHotWaterBtn:hover {
+    background-color: #6d4c41;
+}
+
+/* ------------------------------------------------------------------------- */
+
+.drinkBeingMade-container {
+    display: flex;
+    flex-direction: column;
 }
 
 /* ------------------------------------------------------------------------- */
