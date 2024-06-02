@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrobbled</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="parent-container">
+        <div class="container">
+            <h1>Scrobbled</h1>
+            <div class="game-area">
+                <div id="grid"></div>
+            </div>
+        <div id="selected-word" class="selected-word-class"></div>
+        <button onclick="submitWord()">Submit Word</button>
+        <div id="word-count">Possible words: <span id="total-words">0</span></div>
+    </div>
+        <div class="wordsFoundContainer">
+            <div id="found-words">
+                <h2>Words Found</h2>
+                <div id="results"></div>
+            </div>
+        </div>  
+    </div>
+
+    <div class="credit">
+        <p>Words provided by <a href="https://norvig.com/ngrams/enable1.txt" target="_blank">enable1.txt</a></p>
+    </div>
+
+    <div class="scrobble-link">
+        <p><a href="https://youtu.be/ZPm5BT0VNvs?si=q-ON-GLPs_Bim7io&t=531" target="_blank">trade in those scrobbles for prizes</a></p>
+    </div>
+
+    <div class="main-page-link">
+        <p>Back to <a href="https://l-paz91.github.io" target="_blank">long's playground</a></p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
