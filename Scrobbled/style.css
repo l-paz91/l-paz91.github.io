@@ -96,8 +96,8 @@ button:hover {
 #results {
     margin-top: 10px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(10px, 1fr));
-    grid-gap: 50px;
+    grid-template-columns: repeat(10, minmax(20px, 1fr));
+    grid-gap: 40px;
 }
 
 #word-count {

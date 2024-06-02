@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
             wordList = text.split('\n').map(word => word.trim());
             generateGrid();
         });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                submitWord();
+            }
+        });
 });
 
 function generateGrid() {
