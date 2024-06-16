@@ -1,6 +1,10 @@
-// script.js
+/* -------------------------------------------------------------- */
 
 let wordList = [];
+let maxWordLength = 20;
+let minWordLength = 3;
+
+/* -------------------------------------------------------------- */
 
 document.addEventListener('DOMContentLoaded', () => {
     fetch('dict.txt')
@@ -10,23 +14,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 });
 
-function findAnagrams() {
+/* -------------------------------------------------------------- */
+
+function findAnagrams() 
+{
     const letters = document.getElementById('letters').value.toLowerCase();
     const results = document.getElementById('results');
     results.innerHTML = '';
 
-    if (letters.length < 6 || letters.length > 7) {
-        results.innerHTML = '<p>Please enter 6 or 7 letters.</p>';
+    if (letters.length < minWordLength || letters.length > maxWordLength) 
+    {
+        results.innerHTML = '<p>Enter at least 3 letters...</p>';
         return;
     }
 
-    const anagrams = wordList.filter(word => isAnagram(letters, word) && word.length >= 3 && word.length <= letters.length);
+    const anagrams = wordList.filter(word => isAnagram(letters, word) && word.length >= minWordLength && word.length <= letters.length);
 
-    if (anagrams.length === 0) {
+    if (anagrams.length === 0) 
+    {
         results.innerHTML = '<p>No anagrams found.</p>';
-    } else {
+    } 
+    else 
+    {
         const groupedAnagrams = groupByLength(anagrams);
-        for (const length in groupedAnagrams) {
+        for (const length in groupedAnagrams) 
+        {
             const group = document.createElement('div');
             group.innerHTML = `<h3>Length: ${length}</h3><p>${groupedAnagrams[length].join(', ')}</p>`;
             results.appendChild(group);
@@ -34,33 +46,53 @@ function findAnagrams() {
     }
 }
 
-function isAnagram(letters, word) {
+/* -------------------------------------------------------------- */
+
+function isAnagram(letters, word) 
+{
     const lettersCount = getLetterCount(letters);
     const wordCount = getLetterCount(word);
 
-    for (const letter in wordCount) {
-        if (!lettersCount[letter] || wordCount[letter] > lettersCount[letter]) {
+    for (const letter in wordCount) 
+    {
+        if (!lettersCount[letter] || wordCount[letter] > lettersCount[letter]) 
+        {
             return false;
         }
     }
+
     return true;
 }
 
-function getLetterCount(str) {
+/* -------------------------------------------------------------- */
+
+function getLetterCount(str) 
+{
     const count = {};
-    for (const char of str) {
+    for (const char of str) 
+    {
         count[char] = (count[char] || 0) + 1;
     }
     return count;
 }
 
-function groupByLength(words) {
-    return words.reduce((groups, word) => {
-        const length = word.length;
-        if (!groups[length]) {
-            groups[length] = [];
-        }
-        groups[length].push(word);
-        return groups;
-    }, {});
+/* -------------------------------------------------------------- */
+
+function groupByLength(words) 
+{
+    return words.reduce((groups, word) => 
+        {
+            const length = word.length;
+
+            if (!groups[length]) 
+            {
+                groups[length] = [];
+            }
+
+            groups[length].push(word);
+            return groups;
+        }, {}
+    );
 }
+
+/* -------------------------------------------------------------- */
