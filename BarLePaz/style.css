@@ -1,0 +1,104 @@
+:root{
+    --bg: #0f1a17;            /* deep jungle */
+    --leaf: #1e3a34;          /* shadowed green */
+    --leaf-2: #2b564b;        /* mid green */
+    --accent: #ff944d;        /* tropical neon orange */
+    --cream: #efe6d7;         /* aged parchment */
+    --ink: #e9f3ef;           /* soft light text */
+    --muted: #b9c7c3;         /* mist */
+    --card: #14231f;          /* dark card */
+    --ring: rgba(255,148,77,.2);
+    --shadow: 0 14px 40px rgba(0,0,0,.35);
+    --radius: 18px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: Manrope, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(255,148,77,.08), transparent 60%),
+      radial-gradient(1200px 600px at 10% 110%, rgba(32,86,75,.35), transparent 60%),
+      linear-gradient(180deg, var(--bg), #0b1613 40%);
+  }
+  
+  /* Subtle palm-leaf banding */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; opacity:.18; mix-blend-mode:soft-light;
+    background-image: repeating-linear-gradient(135deg, rgba(239,230,215,0.06) 0 6px, transparent 6px 18px);
+  }
+  
+  .app{max-width:860px;margin:0 auto;padding:16px 16px 120px}
+  
+  /* Header */
+  .top{position:sticky;top:0;z-index:20;background:linear-gradient(180deg, rgba(20,35,31,.92), rgba(20,35,31,.75));backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.06)}
+  .top-inner{display:flex;align-items:center;gap:12px;padding:14px 16px}
+  .logo{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-weight:900;letter-spacing:.5px;color:#1a120d;box-shadow:var(--shadow);
+    background: conic-gradient(from 120deg at 50% 50%, #ffb67c, #f8832e, #ffb67c);
+  }
+  .title{font-family:"Poiret One", system-ui; font-size:22px;letter-spacing:1px;text-transform:uppercase;margin:0}
+  .subtitle{margin:2px 0 0;font-size:12px;color:var(--muted)}
+  
+  /* Search */
+  .searchbar{display:flex;gap:10px;padding:10px 16px 14px}
+  .searchbar input{
+    flex:1;border:1px solid rgba(255,255,255,.08);outline:none;background:var(--card);
+    color:var(--ink);padding:12px 14px;border-radius:14px;box-shadow:var(--shadow)
+  }
+  .searchbar input:focus{border-color:var(--ring);box-shadow:0 0 0 6px var(--ring), var(--shadow)}
+  .iconbtn{border:1px solid rgba(255,255,255,.08);background:var(--card);border-radius:14px;padding:10px 12px;display:grid;place-items:center;box-shadow:var(--shadow);color:var(--ink)}
+  
+  /* Tabs */
+  .tabs{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto}
+  .tab{
+    padding: 10px 14px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.08);
+    background:var(--card);
+    color:var(--muted);
+    font-weight:800;
+    font-size:14px;
+    font-family:"Poiret One", system-ui;
+    text-transform:uppercase;
+    cursor:pointer;
+    white-space:nowrap;
+    box-shadow:var(--shadow)
+}
+  .tab.active{background:linear-gradient(180deg,#2b564b,#1e3a34);color:#e6f7f2;border-color:transparent}
+  
+  /* Cards / List */
+  .grid{display:grid;grid-template-columns:1fr;gap:14px;padding:0 16px}
+  @media (min-width:540px){.grid{grid-template-columns:1fr 1fr}}
+  @media (min-width:900px){.grid{grid-template-columns:1fr 1fr 1fr}}
+  
+  .card{background:var(--card);border-radius:var(--radius);padding:16px;border:1px solid rgba(255,255,255,.06);box-shadow:var(--shadow);position:relative}
+  .card h3{margin:0 0 4px;font-family:"Poiret One", system-ui;font-size:20px;letter-spacing:.5px;text-transform:uppercase;color:var(--cream)}
+  .description{font-size:13px;color:var(--muted)}
+  .meta{font-size:12px;color:#c7d8d3;margin-top:8px}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .badge{font-size:11px;font-weight:800;padding:6px 10px;border-radius:999px;background:linear-gradient(180deg, #203b34, #1a2f2a);color:#bfe6dc;border:1px solid rgba(191,230,220,.25)}
+  .tag{font-size:11px;font-weight:800;padding:4px 8px;border-radius:6px;background:#2a1f19;color:#ffb17a;border:1px solid rgba(255,148,77,.25)}
+  
+  .section-title{
+    padding:24px 16px 8px;
+    font-size:12px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:800
+}
+  
+  .list{display:grid;gap:10px;padding:0 16px}
+  .list-item{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .pill{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;background:#2a1f19;color:#ffb17a;border:1px solid rgba(255,148,77,.25)}
+  
+  /* Bottom bar */
+  .bottombar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 12px;background:rgba(20,35,31,.92);backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.06)}
+  .bottombar .inner{max-width:860px;margin:0 auto;display:flex;gap:10px}
+  .bbtn{flex:1;text-align:center;padding:12px 14px;border-radius:14px;font-weight:900;letter-spacing:.5px;text-transform:uppercase}
+  .bbtn.share{background:linear-gradient(180deg,#2b564b,#1e3a34);color:#e6f7f2;border:1px solid rgba(191,230,220,.22)}
+  .bbtn.qr{background:linear-gradient(180deg,#ffad73,#ee7f2d);color:#1a120d;border:none}
+  
+  .empty{text-align:center;padding:30px;color:var(--muted);font-size:14px}
+  
