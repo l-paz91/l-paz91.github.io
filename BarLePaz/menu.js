@@ -22,7 +22,7 @@ const cocktails = [
       name: "Dark Desire",
       base: ["Rum"],
       vibe: ["Dark", "Bold"],
-      description: "Two black spiced rums with apple–rhubarb for a moody finish.",
+      description: "Two black spiced rums with apple–rhubarb for a moody finish. Add on a shot of Aloha 65 for a spicy accent.",
     },
     {
       name: "Raspberry Sunset",
@@ -39,7 +39,7 @@ const cocktails = [
     {
         name: "Passionfruit Martini",
         base: ["Vodka"],
-        vibe: ["Bright", "Fruity"],
+        vibe: ["Sweet", "Fruity"],
         description: "Vanilla Vodka and Passionfruit Liqueur shaken with lime juice.",
       },
       {
@@ -58,7 +58,7 @@ const cocktails = [
     "Raspberry Liqueur",
     "Absolut Vanilla Vodka",
     "Whitley Neill Japanese Yuzu & Strawberry Gin",
-    "Tequila",
+    "Sierra Tequila Blanco",
     "Lambs Spiced Rum",
     "Licor 43",
     "Kraken Black Spiced Rum - Dark Caramel & Sea Salt",
@@ -66,6 +66,7 @@ const cocktails = [
     "Tiramisu Rum Liqueur",
     "Sticky Toffee Rum Liqueur",
     "Caramelo - Caramel Rum Liqueur",
+    "Baileys Extra Light Cream Liqueur", 
   ];
   
   const mixers = [
@@ -73,7 +74,7 @@ const cocktails = [
     "Raspberry syrup",
     "Coke",
     "Diet Coke - Caffiene Free",
-    "Lemonade",
+    "Diet Lemonade",
     "Pineapple & Coconut juice",
     "Strawberry & Lemon juice",
     "Strawberry lemonade (still)",
