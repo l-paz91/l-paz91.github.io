@@ -16,13 +16,13 @@ const cocktails = [
       name: "Midnight Espresso Twist",
       base: ["Vodka", "Coffee"],
       vibe: ["Rich", "Dessert"],
-      description: "Tia Maria and vanilla vodka with a golden whisper of Licor 43.",
+      description: "Out of stock - Tia Maria and vanilla vodka with a golden whisper of Licor 43.",
     },
     {
       name: "Dark Desire",
       base: ["Rum"],
       vibe: ["Dark", "Bold"],
-      description: "Two black spiced rums with apple–rhubarb for a moody finish. Add on a shot of Aloha 65 for a spicy accent.",
+      description: "Out of stock - Two black spiced rums with apple–rhubarb for a moody finish. Add on a shot of Aloha 65 for a spicy accent.",
     },
     {
       name: "Raspberry Sunset",
@@ -48,6 +48,12 @@ const cocktails = [
         vibe: ["Sweet", "Fruity"],
         description: "Vanilla Vodka and Raspberry Liqueur shaken with Pineapple & Coconut juice.",
       },
+      {
+        name: "Cleveleys Mule",
+        base: ["Vodka"],
+        vibe: ["Refreshing", "Aromatic"],
+        description: "Vanilla Vodka (or vanilla Rum) shaken with lime juice and a shot of vanilla, topped with ginger ale.",
+      },
   ];
   
   const spirits = [
@@ -59,26 +65,22 @@ const cocktails = [
     "Absolut Vanilla Vodka",
     "Whitley Neill Japanese Yuzu & Strawberry Gin",
     "Sierra Tequila Blanco",
-    "Lambs Spiced Rum",
+    "Out of Stock - Lambs Spiced Rum",
     "Licor 43",
     "Kraken Black Spiced Rum - Dark Caramel & Sea Salt",
     "Kraken Black Spiced Rum - Cherry & Madagascan Vanilla",
-    "Tiramisu Rum Liqueur",
-    "Sticky Toffee Rum Liqueur",
-    "Caramelo - Caramel Rum Liqueur",
-    "Baileys Extra Light Cream Liqueur", 
+    "Baileys Extra Light Cream Liqueur",
+    "Advocaat",
   ];
   
   const mixers = [
     "Strawberry syrup",
     "Raspberry syrup",
     "Coke",
-    "Diet Coke - Caffiene Free",
-    "Diet Lemonade",
+    "Slimline Ginger Ale",
+    "Apple, Watermelon & Strawberry Juice Drink",
     "Pineapple & Coconut juice",
     "Strawberry & Lemon juice",
-    "Strawberry lemonade (still)",
-    "Apple & Rhubarb juice",
   ];
   
   // --- Helpers ---------------------------------------------------------------
