@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💣 Word Bomb</title>
+
+  <!-- PeerJS for browser-to-browser connections -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0f0f1a;
+      --surface: #1a1a2e;
+      --surface2: #252540;
+      --accent: #ff6b35;
+      --accent2: #ffd166;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --text: #e0e0e0;
+      --text-dim: #888;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(255, 209, 102, 0.05) 0%, transparent 50%);
+      z-index: -1;
+    }
+
+    h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.5rem;
+      margin-top: 2rem;
+      text-align: center;
+    }
+    h1 .bomb { font-size: 3rem; }
+
+    .subtitle {
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 0 1rem;
+    }
+
+    /* ─── Screens ─── */
+    .screen { display: none; width: 100%; max-width: 500px; padding: 0 1rem; }
+    .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+    /* ─── Cards ─── */
+    .card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      border: 1px solid var(--surface2);
+    }
+
+    .card h2 {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      color: var(--accent2);
+    }
+
+    /* ─── Inputs ─── */
+    .input-group { margin-bottom: 1rem; }
+
+    .input-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 0.3rem;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--surface2);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      font-family: 'Space Mono', monospace;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus { outline: none; border-color: var(--accent); }
+    .input-group input::placeholder { color: #555; }
+
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      width: 100%;
+    }
+    .btn-primary:hover { background: #ff8555; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    .btn-secondary:hover { background: #333355; }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+      gap: 1rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--surface2);
+    }
+    .divider span { color: var(--text-dim); font-size: 0.85rem; }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      min-height: 1.2rem;
+    }
+
+    .status-msg {
+      color: var(--accent2);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      min-height: 1.2rem;
+    }
+
+    /* ─── Waiting Room ─── */
+    .room-code {
+      font-family: 'Space Mono', monospace;
+      font-size: 3rem;
+      color: var(--accent2);
+      letter-spacing: 0.5rem;
+      text-align: center;
+      margin: 1rem 0;
+      user-select: all;
+      cursor: pointer;
+    }
+
+    .room-code-hint {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .waiting-text {
+      color: var(--text-dim);
+      text-align: center;
+      animation: pulse 1.5s ease-in-out infinite;
+      margin: 1rem 0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .player-list {
+      list-style: none;
+      width: 100%;
+      margin: 1rem 0;
+    }
+
+    .player-list li {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .player-list li .lives { font-size: 1.2rem; }
+
+    /* ─── Game Screen ─── */
+    #game-screen { max-width: 600px; }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .player-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      flex: 1;
+      margin: 0 0.5rem;
+      border: 2px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .player-card.active-turn {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(255, 107, 53, 0.2);
+    }
+
+    .player-card .name { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.3rem; }
+    .player-card .hearts { font-size: 1.4rem; transition: all 0.3s; }
+
+    /* ─── Bomb Area ─── */
+    .bomb-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 1.5rem 0;
+    }
+
+    .syllable-prompt {
+      font-family: 'Space Mono', monospace;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--accent2);
+      text-shadow: 0 0 30px rgba(255, 209, 102, 0.3);
+      margin-bottom: 1rem;
+      letter-spacing: 0.2rem;
+    }
+
+    .bomb-visual {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bomb-emoji {
+      font-size: 5rem;
+      animation: wobble 0.5s ease-in-out infinite;
+    }
+
+    .timer-ring {
+      position: absolute;
+      top: -10px; left: -10px;
+      width: 140px;
+      height: 140px;
+    }
+
+    .timer-ring circle {
+      fill: none;
+      stroke-width: 4;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: center;
+    }
+
+    .timer-ring .bg { stroke: var(--surface2); }
+    .timer-ring .progress {
+      stroke: var(--accent);
+      transition: stroke-dashoffset 1s linear, stroke 0.3s;
+    }
+    .timer-ring .progress.danger { stroke: var(--danger); }
+
+    .timer-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      position: absolute;
+      bottom: -30px;
+      color: var(--text);
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2deg); }
+    }
+    .bomb-emoji.fast { animation: wobble 0.15s ease-in-out infinite; }
+
+    /* ─── Word Input ─── */
+    .word-input-area { width: 100%; margin-top: 1rem; }
+
+    #word-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid var(--surface2);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1.2rem;
+      font-family: 'Space Mono', monospace;
+      text-align: center;
+      text-transform: lowercase;
+    }
+    #word-input:focus { outline: none; border-color: var(--accent); }
+    #word-input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .word-feedback {
+      text-align: center;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      min-height: 1.4rem;
+    }
+    .word-feedback.error { color: var(--danger); }
+    .word-feedback.success { color: var(--success); }
+
+    /* ─── Word Log ─── */
+    .word-log {
+      width: 100%;
+      margin-top: 1.5rem;
+      max-height: 150px;
+      overflow-y: auto;
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 0.75rem;
+    }
+
+    .word-log-entry {
+      padding: 0.3rem 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+    }
+    .word-log-entry .word { font-family: 'Space Mono', monospace; color: var(--success); }
+
+    .turn-indicator {
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+    .turn-indicator.your-turn { color: var(--accent); font-weight: 700; }
+
+    .difficulty-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .difficulty-badge.easy { background: #22c55e33; color: #22c55e; }
+    .difficulty-badge.medium { background: #f59e0b33; color: #f59e0b; }
+    .difficulty-badge.hard { background: #ef444433; color: #ef4444; }
+
+    /* ─── Explosion Overlay ─── */
+    .explosion-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .explosion-overlay.active {
+      display: flex;
+      animation: flashBang 0.5s ease-out;
+    }
+    .explosion-text { font-size: 5rem; animation: explode 0.5s ease-out; }
+    .explosion-info { font-size: 1.2rem; margin-top: 1rem; color: var(--accent2); }
+
+    @keyframes flashBang {
+      0% { background: rgba(255, 107, 53, 0.5); }
+      100% { background: rgba(0,0,0,0.7); }
+    }
+    @keyframes explode {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    /* ─── Game Over ─── */
+    .gameover-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      width: 100%;
+      border: 2px solid var(--accent2);
+    }
+    .gameover-card h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+    .gameover-card .winner { font-size: 1.5rem; color: var(--accent2); margin-bottom: 1.5rem; }
+
+    /* ─── Loading bar ─── */
+    .loading-bar-container {
+      width: 100%;
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 3px;
+      margin: 1rem 0;
+      overflow: hidden;
+    }
+    .loading-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.3s;
+      width: 0%;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 0.5rem;
+    }
+    .connection-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--danger);
+    }
+    .connection-dot.connected { background: var(--success); }
+  </style>
+</head>
+<body>
+
+  <h1><span class="bomb">💣</span> Word Bomb</h1>
+  <p class="subtitle">Type a word containing the syllable before the bomb explodes!<br>No server needed — connects peer-to-peer via your browser.</p>
+
+  <!-- ─── Loading Screen ─── -->
+  <div id="loading-screen" class="screen active">
+    <div class="card" style="text-align: center;">
+      <h2>📚 Loading Word List...</h2>
+      <div class="loading-bar-container">
+        <div class="loading-bar" id="loading-bar"></div>
+      </div>
+      <p class="status-msg" id="loading-status">Downloading dictionary...</p>
+    </div>
+  </div>
+
+  <!-- ─── Lobby Screen ─── -->
+  <div id="lobby-screen" class="screen">
+    <div class="card">
+      <h2>🎮 Join or Create a Game</h2>
+
+      <div class="input-group">
+        <label for="player-name">Your Name</label>
+        <input type="text" id="player-name" placeholder="Enter your name..." maxlength="20" autofocus>
+      </div>
+
+      <button class="btn btn-primary" id="btn-create">✨ Create Room</button>
+
+      <div class="divider"><span>or join a friend</span></div>
+
+      <div class="input-group">
+        <label for="room-code-input">Room Code</label>
+        <input type="text" id="room-code-input" placeholder="ABCD" maxlength="4"
+               style="text-transform: uppercase; text-align: center; font-size: 1.3rem; letter-spacing: 0.3rem;">
+      </div>
+
+      <button class="btn btn-secondary" id="btn-join">🚪 Join Room</button>
+
+      <p class="error-msg" id="lobby-error"></p>
+    </div>
+  </div>
+
+  <!-- ─── Waiting Room ─── -->
+  <div id="waiting-screen" class="screen">
+    <div class="card" style="text-align: center;">
+      <h2>🏠 Room Created!</h2>
+      <p style="color: var(--text-dim); margin-bottom: 0.5rem;">Share this code with your colleague:</p>
+      <div class="room-code" id="display-room-code" title="Click to copy">----</div>
+      <p class="room-code-hint">Click the code to copy it</p>
+
+      <ul class="player-list" id="waiting-player-list"></ul>
+
+      <p class="waiting-text" id="waiting-text">Waiting for another player...</p>
+
+      <div class="connection-status">
+        <div class="connection-dot" id="connection-dot"></div>
+        <span id="connection-text">Setting up connection...</span>
+      </div>
+
+      <button class="btn btn-primary" id="btn-start" style="display: none;">🚀 Start Game!</button>
+    </div>
+  </div>
+
+  <!-- ─── Game Screen ─── -->
+  <div id="game-screen" class="screen" style="max-width: 600px;">
+    <div class="game-header" id="game-header"></div>
+
+    <span class="difficulty-badge easy" id="difficulty-badge">EASY</span>
+
+    <div class="bomb-area">
+      <div class="syllable-prompt" id="syllable-prompt">---</div>
+      <div class="bomb-visual">
+        <svg class="timer-ring" viewBox="0 0 140 140">
+          <circle class="bg" cx="70" cy="70" r="60"/>
+          <circle class="progress" id="timer-progress" cx="70" cy="70" r="60"
+                  stroke-dasharray="377" stroke-dashoffset="0"/>
+        </svg>
+        <span class="bomb-emoji" id="bomb-emoji">💣</span>
+      </div>
+      <span class="timer-text" id="timer-text">12</span>
+    </div>
+
+    <p class="turn-indicator" id="turn-indicator">...</p>
+
+    <div class="word-input-area">
+      <input type="text" id="word-input" placeholder="Type a word..."
+             maxlength="30" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <p class="word-feedback" id="word-feedback"></p>
+    </div>
+
+    <div class="word-log" id="word-log"></div>
+  </div>
+
+  <!-- ─── Game Over ─── -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-card">
+      <h2>🎉 Game Over!</h2>
+      <p class="winner" id="winner-text"></p>
+      <button class="btn btn-primary" id="btn-play-again">🔄 Play Again</button>
+      <button class="btn btn-secondary" id="btn-back-lobby">🏠 Back to Lobby</button>
+    </div>
+  </div>
+
+  <!-- ─── Explosion Overlay ─── -->
+  <div class="explosion-overlay" id="explosion-overlay">
+    <div class="explosion-text">💥</div>
+    <p class="explosion-info" id="explosion-info"></p>
+  </div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 💣 WORD BOMB — Fully Static P2P Version
+// ═══════════════════════════════════════════════════════════════
+
+const $ = id => document.getElementById(id);
+const CIRCUMFERENCE = 2 * Math.PI * 60;
+
+// ─── Syllable prompts ────────────────────────────────────────
+const SYLLABLES = {
+  easy: [
+    "ing","tion","ment","ness","able","ful","ous","ive",
+    "est","ght","and","for","all","out","ore",
+    "ate","ine","ant","ent","ist","ure","age",
+    "air","ear","art","ark","arm","ail","ain","ake",
+    "ame","ane","ape","are","ase","ave","awn",
+    "eal","eam","ean","eat","eed","eel","een",
+    "eer","ell","end","ess","ice","ide","ife",
+    "ike","ile","ill","ime","ind","ire",
+    "ite","ock","oil","old","ole","one","ood",
+    "ook","ool","oom","oon","ope","orn","ose",
+    "own","uck","ule","ump","ung","unk","urn","use"
+  ],
+  medium: [
+    "ough","ance","ence","ible","ular","ious",
+    "eous","ther","atch","ight","ound","ange",
+    "oint","ould","outh","orth","east","west","over",
+    "under","ower","amp","umb","alf","omb"
+  ],
+  hard: [
+    "xio","phy","phr","rhy","thy",
+    "ynx","ymph","yst","psych","aque","ique",
+    "eux","quo","qua","xi","zu"
+  ]
+};
+
+// ─── Word list ───────────────────────────────────────────────
+let wordSet = null;
+
+async function loadWordList() {
+  const bar = $('loading-bar');
+  const status = $('loading-status');
+
+  // Try loading from a popular GitHub-hosted word list
+  const WORD_LIST_URLS = [
+    'https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt',
+    'https://raw.githubusercontent.com/first20hours/google-10000-english/master/20k.txt'
+  ];
+
+  for (const url of WORD_LIST_URLS) {
+    try {
+      status.textContent = 'Downloading dictionary...';
+      bar.style.width = '20%';
+
+      const response = await fetch(url);
+      if (!response.ok) continue;
+
+      bar.style.width = '60%';
+      status.textContent = 'Processing words...';
+
+      const text = await response.text();
+      wordSet = new Set(
+        text.split(/\r?\n/)
+          .map(w => w.trim().toLowerCase())
+          .filter(w => w.length >= 2 && /^[a-z]+$/.test(w))
+      );
+
+      bar.style.width = '100%';
+      status.textContent = `Loaded ${wordSet.size.toLocaleString()} words!`;
+
+      await new Promise(r => setTimeout(r, 500));
+      return true;
+    } catch (e) {
+      console.warn('Failed to load from', url, e);
+    }
+  }
+
+  // Fallback: use a small built-in set (still playable!)
+  status.textContent = 'Using offline word list...';
+  wordSet = buildFallbackWordList();
+  bar.style.width = '100%';
+  await new Promise(r => setTimeout(r, 500));
+  return true;
+}
+
+function buildFallbackWordList() {
+  // ~3000 common English words as fallback
+  const common = [
+    "about","above","across","after","again","against","along","also","always","among",
+    "another","answer","any","around","ask","away","back","because","been","before",
+    "began","begin","being","below","between","big","black","blue","body","book",
+    "both","boy","bring","build","but","call","came","can","car","care",
+    "carry","change","child","children","city","close","come","could","country","cut",
+    "day","did","different","does","done","door","down","draw","earth","eat",
+    "end","enough","even","every","example","eye","face","family","far","father",
+    "feet","few","find","first","follow","food","form","found","four","from",
+    "gave","get","girl","give","go","going","good","got","great","green",
+    "group","grow","had","hand","hard","has","have","head","hear","help",
+    "her","here","high","him","his","home","house","how","idea","important",
+    "into","its","just","keep","kind","know","land","large","last","later",
+    "learn","leave","left","let","letter","life","light","like","line","list",
+    "little","live","long","look","made","make","man","many","may","mean",
+    "men","might","mile","mind","miss","money","more","most","mother","move",
+    "much","must","name","near","need","never","new","next","night","not",
+    "now","number","off","often","old","once","one","only","open","order",
+    "other","our","out","over","own","page","paper","part","people","picture",
+    "place","plant","play","point","put","question","quite","ran","read","real",
+    "red","right","river","run","said","same","saw","say","school","sea",
+    "second","see","seem","sentence","set","she","should","show","side","small",
+    "some","something","sometimes","song","soon","sound","spell","start","state","still",
+    "stop","story","study","such","take","talk","tell","than","that","the",
+    "them","then","there","these","they","thing","think","this","those","thought",
+    "three","through","time","together","told","too","took","tree","turn","two",
+    "under","until","upon","use","very","walk","want","was","water","way",
+    "well","went","were","what","when","where","which","while","white","who",
+    "why","will","with","without","word","work","world","would","write","year",
+    "young","able","action","actually","addition","afternoon","age","ago","air","almost",
+    "already","although","animal","anything","area","arm","art","attention","available",
+    "beautiful","bed","best","better","bird","bit","blood","board","boat","bottom",
+    "box","break","bright","broken","brother","brown","burning","bus","business","buy",
+    "captain","catch","caught","cause","center","certain","chair","chance","charge","check",
+    "church","circle","class","clean","clear","cold","color","coming","common","community",
+    "company","complete","computer","condition","consider","contain","control","cook","cool",
+    "corner","cost","count","couple","course","cover","cross","cry","cup","dark",
+    "daughter","dead","deal","death","decide","deep","design","develop","die","dinner",
+    "direction","discover","doctor","dog","doing","double","drink","drive","drop","dry",
+    "during","each","early","east","edge","education","effect","effort","eight","either",
+    "else","energy","engine","enjoy","enter","entire","environment","especially","evening",
+    "ever","everyone","everything","evidence","exactly","experience","explain","express","extra",
+    "fact","fall","fast","feeling","field","fight","figure","fill","final","fine",
+    "finger","finish","fire","fish","five","floor","fly","force","forget","forward",
+    "free","fresh","friend","front","full","fun","future","game","garden","general",
+    "glass","gold","gone","government","ground","guess","gun","hair","half","hang",
+    "happen","happy","hat","hate","heart","heat","heavy","herself","hill","himself",
+    "history","hit","hold","hole","hope","horse","hospital","hot","hotel","hour",
+    "human","hundred","husband","imagine","include","increase","industry","information","inside",
+    "instead","interest","island","issue","itself","job","join","jump","justice","kill",
+    "kitchen","lake","language","late","laugh","law","lay","lead","least","less",
+    "lie","likely","listen","living","local","lose","lot","love","low","lunch",
+    "machine","main","major","manage","market","material","matter","maybe","measure","meet",
+    "member","memory","mention","middle","military","million","minute","modern","moment","month",
+    "morning","mouth","movement","movie","music","myself","nation","national","natural","nature",
+    "necessary","news","nice","nine","none","nor","normal","north","note","nothing",
+    "notice","offer","office","officer","oh","oil","operation","opportunity","option","outside",
+    "painting","pair","park","particular","party","pass","past","pattern","pay","peace",
+    "perhaps","period","person","personal","phone","pick","piece","plan","please","plus",
+    "political","poor","popular","position","possible","power","practice","prepare","present",
+    "president","pressure","pretty","price","private","probably","problem","produce","product",
+    "program","project","property","protect","prove","provide","public","pull","purpose","push",
+    "quality","quickly","radio","raise","range","rate","rather","reach","ready","reason",
+    "receive","recent","record","relationship","remember","remove","report","require","research",
+    "resource","rest","result","return","rich","rise","risk","road","rock","role",
+    "room","rule","safe","scene","section","security","sense","serious","serve","service",
+    "seven","several","share","short","shot","simply","since","single","sister","sit",
+    "situation","six","size","skill","skin","sleep","society","soldier","somebody","son",
+    "sort","source","south","space","speak","special","spend","sport","spring","staff",
+    "stage","stand","standard","star","station","stay","step","stock","store","street",
+    "strong","structure","student","success","suddenly","suffer","suggest","summer","support",
+    "sure","surface","system","table","teacher","team","technology","ten","test","thank",
+    "theory","third","thousand","throw","thus","today","tonight","top","total","tough",
+    "toward","town","trade","training","travel","treat","trial","trouble","true","truth",
+    "try","type","unit","understand","usually","value","various","view","violence","visit",
+    "voice","wait","wall","war","watch","weapon","wear","week","weight","west",
+    "western","whatever","whole","whom","wide","wife","win","window","wish","woman",
+    "wonder","wrong","yard","yeah","yesterday","among","morning","nothing","something","anything",
+    "everything","building","fighting","getting","going","having","looking","making","morning",
+    "nothing","running","something","standing","taking","thinking","walking","wanting","working",
+    "writing","playing","reading","speaking","teaching","learning","feeling","meaning","meeting",
+    "opening","painting","planning","pointing","raining","resting","sailing","sitting","sleeping",
+    "smiling","spending","starting","stopping","talking","testing","trading","training","traveling",
+    "turning","waiting","watching","wearing","winning","wishing","wondering","afternoon","attention",
+    "beautiful","condition","direction","education","environment","government","important","information",
+    "introduction","national","operation","opportunity","particular","population","position","production",
+    "question","relationship","situation","structure","technology","understand","adventure","furniture",
+    "literature","manufacture","nature","picture","pressure","temperature","treasure","creature",
+    "feature","measure","pleasure","capture","culture","departure","exposure","failure","figure",
+    "gesture","moisture","mixture","posture","sculpture","signature","structure","texture","venture",
+    "nightmare","somewhere","anywhere","everywhere","therefore","furthermore","atmosphere","metaphor",
+    "ight","fight","light","might","night","right","sight","tight","bright","flight",
+    "fright","knight","slight","delight","midnight","tonight","moonlight","sunlight","daylight",
+    "flashlight","highlight","oversight","outright","birthright","copyright","downright","forthright",
+    "insight","oversight","spotlight","starlight","stoplight","straightforward","twilight","upright",
+    "airtight","eyesight","foresight","hindsight","oversight","playwright","lightweight","heavyweight"
+  ];
+  return new Set(common);
+}
+
+function isValidWord(word) {
+  return wordSet && wordSet.has(word.toLowerCase().trim());
+}
+
+// ─── Game State ──────────────────────────────────────────────
+let peer = null;
+let conn = null;
+let isHost = false;
+let myName = '';
+let roomCode = '';
+
+// Shared game state (managed by host, synced to guest)
+let gameState = {
+  players: [],       // [{ name, lives }]
+  currentTurn: 0,
+  currentSyllable: '',
+  usedWords: [],     // array for JSON serialization (Set doesn't serialize)
+  state: 'waiting',
+  difficulty: 'easy',
+  roundCount: 0,
+  timerSeconds: 12,
+};
+
+let timerInterval = null;
+let timerRemaining = 0;
+
+// ─── Screen Management ───────────────────────────────────────
+const screens = {
+  loading: $('loading-screen'),
+  lobby: $('lobby-screen'),
+  waiting: $('waiting-screen'),
+  game: $('game-screen'),
+  gameover: $('gameover-screen'),
+};
+
+function showScreen(name) {
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  screens[name].classList.add('active');
+}
+
+// ─── PeerJS Connection ───────────────────────────────────────
+function generateRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function makePeerId(code) {
+  return 'wordbomb-' + code.toLowerCase();
+}
+
+function send(data) {
+  if (conn && conn.open) {
+    conn.send(data);
+  }
+}
+
+function handleMessage(data) {
+  switch (data.type) {
+    case 'gameState':
+      gameState = data.state;
+      // Rebuild usedWords as a Set locally for quick lookups
+      renderGameState();
+      break;
+
+    case 'tick':
+      timerRemaining = data.remaining;
+      renderTick(data.remaining);
+      break;
+
+    case 'wordResult':
+      showWordFeedback(data.valid, data.reason);
+      break;
+
+    case 'wordAccepted':
+      showWordAccepted(data.word, data.player);
+      break;
+
+    case 'explosion':
+      showExplosion(data.player, data.lives);
+      break;
+
+    case 'gameOver':
+      showGameOver(data.winner);
+      break;
+
+    case 'submitWord':
+      // Host receives word submission from guest
+      if (isHost) handleWordSubmission(data.word, 1); // guest is player index 1
+      break;
+
+    case 'requestStart':
+      if (isHost) startGame();
+      break;
+
+    case 'requestPlayAgain':
+      if (isHost) resetGame();
+      break;
+
+    case 'playerInfo':
+      // Host receives guest's name
+      if (isHost) {
+        gameState.players[1] = { name: data.name, lives: 3 };
+        broadcastState();
+      }
+      break;
+  }
+}
+
+function setupConnection(connection) {
+  conn = connection;
+
+  conn.on('open', () => {
+    $('connection-dot').classList.add('connected');
+    $('connection-text').textContent = 'Connected!';
+
+    if (!isHost) {
+      // Send our name to host
+      send({ type: 'playerInfo', name: myName });
+    }
+  });
+
+  conn.on('data', handleMessage);
+
+  conn.on('close', () => {
+    $('connection-dot').classList.remove('connected');
+    $('connection-text').textContent = 'Disconnected';
+    if (timerInterval) clearInterval(timerInterval);
+
+    // If in game, show feedback
+    if (screens.game.classList.contains('active')) {
+      $('word-feedback').textContent = 'Opponent disconnected!';
+      $('word-feedback').className = 'word-feedback error';
+    }
+  });
+}
+
+// ─── Host: Create Room ───────────────────────────────────────
+function createRoom() {
+  isHost = true;
+  roomCode = generateRoomCode();
+  const peerId = makePeerId(roomCode);
+
+  peer = new Peer(peerId, {
+    debug: 0,
+    config: {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+      ]
+    }
+  });
+
+  peer.on('open', () => {
+    $('display-room-code').textContent = roomCode;
+    $('connection-dot').classList.add('connected');
+    $('connection-text').textContent = 'Room ready — waiting for opponent';
+
+    gameState.players = [{ name: myName, lives: 3 }];
+    updateWaitingRoom();
+    showScreen('waiting');
+  });
+
+  peer.on('connection', (connection) => {
+    setupConnection(connection);
+  });
+
+  peer.on('error', (err) => {
+    console.error('Peer error:', err);
+    if (err.type === 'unavailable-id') {
+      $('lobby-error').textContent = 'Room code conflict — try again!';
+      roomCode = generateRoomCode();
+      peer.destroy();
+      createRoom();
+    } else {
+      $('lobby-error').textContent = `Connection error: ${err.type}`;
+    }
+  });
+}
+
+// ─── Guest: Join Room ────────────────────────────────────────
+function joinRoom(code) {
+  isHost = false;
+  roomCode = code.toUpperCase();
+  const peerId = makePeerId(roomCode);
+
+  peer = new Peer(undefined, {
+    debug: 0,
+    config: {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+      ]
+    }
+  });
+
+  peer.on('open', () => {
+    const connection = peer.connect(peerId, { reliable: true });
+    setupConnection(connection);
+    $('display-room-code').textContent = roomCode;
+    showScreen('waiting');
+  });
+
+  peer.on('error', (err) => {
+    console.error('Peer error:', err);
+    if (err.type === 'peer-unavailable') {
+      $('lobby-error').textContent = 'Room not found! Check the code.';
+      showScreen('lobby');
+    } else {
+      $('lobby-error').textContent = `Connection error: ${err.type}`;
+    }
+  });
+}
+
+// ─── Host: Game Logic ────────────────────────────────────────
+function pickSyllable() {
+  let diff = 'easy';
+  if (gameState.roundCount > 20) diff = 'hard';
+  else if (gameState.roundCount > 10) diff = 'medium';
+  gameState.difficulty = diff;
+
+  const pool = SYLLABLES[diff];
+  return pool[Math.floor(Math.random() * pool.length)].toUpperCase();
+}
+
+function getTimerDuration() {
+  if (gameState.roundCount > 20) return 7;
+  if (gameState.roundCount > 10) return 9;
+  return 12;
+}
+
+function broadcastState() {
+  const stateToSend = { ...gameState };
+  // Convert usedWords back to array for serialization
+  if (stateToSend.usedWords instanceof Set) {
+    stateToSend.usedWords = [...stateToSend.usedWords];
+  }
+
+  // Update own UI
+  renderGameState();
+
+  // Send to guest
+  send({ type: 'gameState', state: stateToSend });
+
+  // Update waiting room if still waiting
+  if (gameState.state === 'waiting') {
+    updateWaitingRoom();
+  }
+}
+
+function startGame() {
+  gameState.state = 'playing';
+  gameState.roundCount = 0;
+  gameState.usedWords = new Set();
+  gameState.players.forEach(p => p.lives = 3);
+  gameState.currentTurn = Math.floor(Math.random() * 2);
+  startTurn();
+}
+
+function startTurn() {
+  gameState.currentSyllable = pickSyllable();
+  gameState.timerSeconds = getTimerDuration();
+  timerRemaining = gameState.timerSeconds;
+  broadcastState();
+
+  if (timerInterval) clearInterval(timerInterval);
+
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+
+    // Send tick to self and guest
+    renderTick(timerRemaining);
+    send({ type: 'tick', remaining: timerRemaining });
+
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+
+      // Current player loses a life
+      const player = gameState.players[gameState.currentTurn];
+      player.lives--;
+
+      const explosionData = { player: player.name, lives: player.lives };
+      showExplosion(explosionData.player, explosionData.lives);
+      send({ type: 'explosion', ...explosionData });
+
+      // Check for game over
+      const alive = gameState.players.filter(p => p.lives > 0);
+      if (alive.length <= 1) {
+        gameState.state = 'gameover';
+        const winner = alive[0] ? alive[0].name : 'Nobody';
+        setTimeout(() => {
+          showGameOver(winner);
+          send({ type: 'gameOver', winner });
+        }, 2500);
+        return;
+      }
+
+      // Next turn
+      setTimeout(() => {
+        advanceTurn();
+        startTurn();
+      }, 2500);
+    }
+  }, 1000);
+}
+
+function advanceTurn() {
+  do {
+    gameState.currentTurn = (gameState.currentTurn + 1) % gameState.players.length;
+  } while (gameState.players[gameState.currentTurn].lives <= 0);
+  gameState.roundCount++;
+}
+
+function handleWordSubmission(word, playerIndex) {
+  const cleanWord = word.trim().toLowerCase();
+  const player = gameState.players[playerIndex];
+
+  if (gameState.currentTurn !== playerIndex) {
+    send({ type: 'wordResult', valid: false, reason: "It's not your turn!" });
+    return;
+  }
+
+  if (cleanWord.length < 2) {
+    const result = { type: 'wordResult', valid: false, reason: 'Word too short!' };
+    if (playerIndex === 0) showWordFeedback(false, result.reason);
+    else send(result);
+    return;
+  }
+
+  if (!cleanWord.includes(gameState.currentSyllable.toLowerCase())) {
+    const result = { type: 'wordResult', valid: false, reason: `Must contain "${gameState.currentSyllable}"!` };
+    if (playerIndex === 0) showWordFeedback(false, result.reason);
+    else send(result);
+    return;
+  }
+
+  const usedSet = gameState.usedWords instanceof Set ? gameState.usedWords : new Set(gameState.usedWords);
+  if (usedSet.has(cleanWord)) {
+    const result = { type: 'wordResult', valid: false, reason: 'Word already used!' };
+    if (playerIndex === 0) showWordFeedback(false, result.reason);
+    else send(result);
+    return;
+  }
+
+  if (!isValidWord(cleanWord)) {
+    const result = { type: 'wordResult', valid: false, reason: 'Not a valid word!' };
+    if (playerIndex === 0) showWordFeedback(false, result.reason);
+    else send(result);
+    return;
+  }
+
+  // Valid!
+  if (gameState.usedWords instanceof Set) {
+    gameState.usedWords.add(cleanWord);
+  } else {
+    gameState.usedWords.push(cleanWord);
+    gameState.usedWords = new Set(gameState.usedWords);
+  }
+
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+
+  showWordAccepted(cleanWord, player.name);
+  send({ type: 'wordAccepted', word: cleanWord, player: player.name });
+
+  advanceTurn();
+  startTurn();
+}
+
+function resetGame() {
+  gameState.state = 'waiting';
+  gameState.roundCount = 0;
+  gameState.usedWords = new Set();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+  gameState.players.forEach(p => p.lives = 3);
+  broadcastState();
+}
+
+// ─── UI Rendering ────────────────────────────────────────────
+function updateWaitingRoom() {
+  const list = $('waiting-player-list');
+  list.innerHTML = gameState.players
+    .filter(p => p && p.name)
+    .map(p => `<li><span>${p.name}</span><span class="lives">${'❤️'.repeat(p.lives)}</span></li>`)
+    .join('');
+
+  const playerCount = gameState.players.filter(p => p && p.name).length;
+  if (playerCount >= 2) {
+    $('waiting-text').textContent = 'Ready to go!';
+    $('waiting-text').style.animation = 'none';
+    $('btn-start').style.display = 'block';
+  } else {
+    $('waiting-text').textContent = 'Waiting for another player...';
+    $('btn-start').style.display = 'none';
+  }
+}
+
+function getMyIndex() {
+  return gameState.players.findIndex(p => p.name === myName);
+}
+
+function renderGameState() {
+  if (gameState.state === 'waiting') {
+    updateWaitingRoom();
+    if (screens.game.classList.contains('active') || screens.gameover.classList.contains('active')) {
+      showScreen('waiting');
+    }
+    return;
+  }
+
+  if (gameState.state === 'playing') {
+    showScreen('game');
+    const myIdx = getMyIndex();
+
+    // Player cards
+    $('game-header').innerHTML = gameState.players.map((p, i) =>
+      `<div class="player-card ${i === gameState.currentTurn ? 'active-turn' : ''}">
+        <div class="name">${p.name}${i === myIdx ? ' (you)' : ''}</div>
+        <div class="hearts">${'❤️'.repeat(Math.max(0, p.lives))}${'🖤'.repeat(Math.max(0, 3 - p.lives))}</div>
+      </div>`
+    ).join('');
+
+    // Syllable
+    $('syllable-prompt').textContent = gameState.currentSyllable;
+
+    // Difficulty
+    const badge = $('difficulty-badge');
+    badge.textContent = gameState.difficulty.toUpperCase();
+    badge.className = `difficulty-badge ${gameState.difficulty}`;
+
+    // Turn indicator
+    const isMyTurn = gameState.currentTurn === myIdx;
+    const indicator = $('turn-indicator');
+    indicator.textContent = isMyTurn
+      ? "⚡ YOUR TURN — type fast!"
+      : `Waiting for ${gameState.players[gameState.currentTurn].name}...`;
+    indicator.className = `turn-indicator ${isMyTurn ? 'your-turn' : ''}`;
+
+    // Input
+    const input = $('word-input');
+    input.disabled = !isMyTurn;
+    if (isMyTurn) {
+      input.value = '';
+      input.focus();
+    }
+    $('word-feedback').textContent = '';
+  }
+}
+
+function renderTick(remaining) {
+  $('timer-text').textContent = remaining;
+  const offset = CIRCUMFERENCE * (1 - remaining / gameState.timerSeconds);
+  const progress = $('timer-progress');
+  progress.style.strokeDashoffset = offset;
+  progress.classList.toggle('danger', remaining <= 3);
+  $('bomb-emoji').classList.toggle('fast', remaining <= 3);
+}
+
+function showWordFeedback(valid, reason) {
+  const fb = $('word-feedback');
+  fb.textContent = reason;
+  fb.className = `word-feedback ${valid ? 'success' : 'error'}`;
+  if (!valid) {
+    const input = $('word-input');
+    input.style.animation = 'none';
+    input.offsetHeight;
+    input.style.animation = 'shake 0.3s ease-in-out';
+    input.select();
+  }
+}
+
+function showWordAccepted(word, player) {
+  const fb = $('word-feedback');
+  fb.textContent = `✅ ${player}: "${word}"`;
+  fb.className = 'word-feedback success';
+
+  const log = $('word-log');
+  const entry = document.createElement('div');
+  entry.className = 'word-log-entry';
+  entry.innerHTML = `<span>${player}</span><span class="word">${word}</span>`;
+  log.prepend(entry);
+}
+
+function showExplosion(player, lives) {
+  const overlay = $('explosion-overlay');
+  $('explosion-info').textContent = `${player} ran out of time! (${lives} ${lives === 1 ? 'life' : 'lives'} left)`;
+  overlay.classList.add('active');
+  setTimeout(() => overlay.classList.remove('active'), 2000);
+}
+
+function showGameOver(winner) {
+  $('winner-text').textContent = `🏆 ${winner} wins!`;
+  showScreen('gameover');
+}
+
+// ─── Event Listeners ─────────────────────────────────────────
+$('btn-create').onclick = () => {
+  myName = $('player-name').value.trim();
+  if (!myName) { $('lobby-error').textContent = 'Enter your name first!'; return; }
+  $('lobby-error').textContent = '';
+  createRoom();
+};
+
+$('btn-join').onclick = () => {
+  myName = $('player-name').value.trim();
+  const code = $('room-code-input').value.trim().toUpperCase();
+  if (!myName) { $('lobby-error').textContent = 'Enter your name first!'; return; }
+  if (!code || code.length !== 4) { $('lobby-error').textContent = 'Enter a 4-letter room code!'; return; }
+  $('lobby-error').textContent = '';
+  joinRoom(code);
+};
+
+$('player-name').addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-create').click(); });
+$('room-code-input').addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-join').click(); });
+
+$('btn-start').onclick = () => {
+  if (isHost) startGame();
+  else send({ type: 'requestStart' });
+};
+
+$('word-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const word = $('word-input').value.trim();
+    if (!word) return;
+
+    if (isHost) {
+      handleWordSubmission(word, 0); // host is player 0
+    } else {
+      send({ type: 'submitWord', word });
+    }
+  }
+});
+
+$('btn-play-again').onclick = () => {
+  if (isHost) resetGame();
+  else send({ type: 'requestPlayAgain' });
+};
+
+$('btn-back-lobby').onclick = () => {
+  if (peer) peer.destroy();
+  if (timerInterval) clearInterval(timerInterval);
+  conn = null;
+  peer = null;
+  $('word-log').innerHTML = '';
+  showScreen('lobby');
+};
+
+// Copy room code on click
+$('display-room-code').onclick = () => {
+  navigator.clipboard.writeText(roomCode).then(() => {
+    const el = $('display-room-code');
+    const orig = el.textContent;
+    el.textContent = 'COPIED!';
+    el.style.color = 'var(--success)';
+    setTimeout(() => { el.textContent = orig; el.style.color = ''; }, 1000);
+  });
+};
+
+// ─── Init ────────────────────────────────────────────────────
+async function init() {
+  await loadWordList();
+  showScreen('lobby');
+  $('player-name').focus();
+}
+
+init();
+</script>
+</body>
+</html>
