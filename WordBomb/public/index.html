@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💣 Word Bomb</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0f0f1a;
+      --surface: #1a1a2e;
+      --surface2: #252540;
+      --accent: #ff6b35;
+      --accent2: #ffd166;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --text: #e0e0e0;
+      --text-dim: #888;
+      --bomb-glow: #ff6b35;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* Background animation */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(255, 209, 102, 0.05) 0%, transparent 50%);
+      z-index: -1;
+    }
+
+    h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.5rem;
+      margin-top: 2rem;
+      text-align: center;
+    }
+    h1 .bomb { font-size: 3rem; }
+
+    .subtitle {
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+
+    /* ─── Screens ─── */
+    .screen { display: none; width: 100%; max-width: 500px; padding: 0 1rem; }
+    .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+    /* ─── Lobby ─── */
+    .lobby-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      border: 1px solid var(--surface2);
+    }
+
+    .lobby-card h2 {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      color: var(--accent2);
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 0.3rem;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--surface2);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      font-family: 'Space Mono', monospace;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .input-group input::placeholder { color: #555; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      width: 100%;
+    }
+    .btn-primary:hover { background: #ff8555; transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    .btn-secondary:hover { background: #333355; }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+      gap: 1rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--surface2);
+    }
+    .divider span { color: var(--text-dim); font-size: 0.85rem; }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      min-height: 1.2rem;
+    }
+
+    /* ─── Waiting Room ─── */
+    .room-code {
+      font-family: 'Space Mono', monospace;
+      font-size: 3rem;
+      color: var(--accent2);
+      letter-spacing: 0.5rem;
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .waiting-text {
+      color: var(--text-dim);
+      text-align: center;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .player-list {
+      list-style: none;
+      width: 100%;
+      margin: 1rem 0;
+    }
+
+    .player-list li {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .player-list li .lives { font-size: 1.2rem; }
+
+    /* ─── Game Screen ─── */
+    #game-screen { max-width: 600px; }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .player-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      flex: 1;
+      margin: 0 0.5rem;
+      border: 2px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .player-card.active-turn {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(255, 107, 53, 0.2);
+    }
+
+    .player-card .name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .player-card .hearts {
+      font-size: 1.4rem;
+      transition: all 0.3s;
+    }
+
+    /* ─── Bomb Area ─── */
+    .bomb-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+
+    .syllable-prompt {
+      font-family: 'Space Mono', monospace;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--accent2);
+      text-shadow: 0 0 30px rgba(255, 209, 102, 0.3);
+      margin-bottom: 1rem;
+      letter-spacing: 0.2rem;
+    }
+
+    .bomb-visual {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bomb-emoji {
+      font-size: 5rem;
+      animation: wobble 0.5s ease-in-out infinite;
+    }
+
+    .timer-ring {
+      position: absolute;
+      top: -10px; left: -10px;
+      width: 140px;
+      height: 140px;
+    }
+
+    .timer-ring circle {
+      fill: none;
+      stroke-width: 4;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: center;
+    }
+
+    .timer-ring .bg { stroke: var(--surface2); }
+    .timer-ring .progress {
+      stroke: var(--accent);
+      transition: stroke-dashoffset 1s linear, stroke 0.3s;
+    }
+    .timer-ring .progress.danger { stroke: var(--danger); }
+
+    .timer-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      position: absolute;
+      bottom: -30px;
+      color: var(--text);
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2deg); }
+    }
+
+    .bomb-emoji.fast {
+      animation: wobble 0.15s ease-in-out infinite;
+    }
+
+    /* ─── Word Input ─── */
+    .word-input-area {
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .word-input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    #word-input {
+      flex: 1;
+      padding: 1rem;
+      border: 2px solid var(--surface2);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1.2rem;
+      font-family: 'Space Mono', monospace;
+      text-align: center;
+      text-transform: lowercase;
+    }
+
+    #word-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    #word-input:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .word-feedback {
+      text-align: center;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      min-height: 1.4rem;
+      transition: all 0.2s;
+    }
+
+    .word-feedback.error { color: var(--danger); }
+    .word-feedback.success { color: var(--success); }
+
+    /* ─── Word Log ─── */
+    .word-log {
+      width: 100%;
+      margin-top: 1.5rem;
+      max-height: 150px;
+      overflow-y: auto;
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 0.75rem;
+    }
+
+    .word-log-entry {
+      padding: 0.3rem 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .word-log-entry .word {
+      font-family: 'Space Mono', monospace;
+      color: var(--success);
+    }
+
+    /* ─── Explosion Animation ─── */
+    .explosion-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .explosion-overlay.active {
+      display: flex;
+      animation: flashBang 0.5s ease-out;
+    }
+
+    .explosion-text {
+      font-size: 5rem;
+      animation: explode 0.5s ease-out;
+    }
+
+    .explosion-info {
+      font-size: 1.2rem;
+      margin-top: 1rem;
+      color: var(--accent2);
+    }
+
+    @keyframes flashBang {
+      0% { background: rgba(255, 107, 53, 0.5); }
+      100% { background: rgba(0,0,0,0.7); }
+    }
+
+    @keyframes explode {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ─── Game Over ─── */
+    .gameover-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      width: 100%;
+      border: 2px solid var(--accent2);
+    }
+
+    .gameover-card h2 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .gameover-card .winner {
+      font-size: 1.5rem;
+      color: var(--accent2);
+      margin-bottom: 1.5rem;
+    }
+
+    .turn-indicator {
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .turn-indicator.your-turn {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .difficulty-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .difficulty-badge.easy { background: #22c55e33; color: #22c55e; }
+    .difficulty-badge.medium { background: #f59e0b33; color: #f59e0b; }
+    .difficulty-badge.hard { background: #ef444433; color: #ef4444; }
+  </style>
+</head>
+<body>
+
+  <h1><span class="bomb">💣</span> Word Bomb</h1>
+  <p class="subtitle">Type a word containing the syllable before the bomb explodes!</p>
+
+  <!-- ─── Lobby Screen ─── -->
+  <div id="lobby-screen" class="screen active">
+    <div class="lobby-card">
+      <h2>🎮 Join or Create a Game</h2>
+
+      <div class="input-group">
+        <label for="player-name">Your Name</label>
+        <input type="text" id="player-name" placeholder="Enter your name..." maxlength="20" autofocus>
+      </div>
+
+      <button class="btn btn-primary" id="btn-create">
+        ✨ Create Room
+      </button>
+
+      <div class="divider"><span>or join a friend</span></div>
+
+      <div class="input-group">
+        <label for="room-code-input">Room Code</label>
+        <input type="text" id="room-code-input" placeholder="ABCD" maxlength="4"
+               style="text-transform: uppercase; text-align: center; font-size: 1.3rem; letter-spacing: 0.3rem;">
+      </div>
+
+      <button class="btn btn-secondary" id="btn-join">
+        🚪 Join Room
+      </button>
+
+      <p class="error-msg" id="lobby-error"></p>
+    </div>
+  </div>
+
+  <!-- ─── Waiting Room Screen ─── -->
+  <div id="waiting-screen" class="screen">
+    <div class="lobby-card" style="text-align: center;">
+      <h2>🏠 Room Created!</h2>
+      <p style="color: var(--text-dim); margin-bottom: 0.5rem;">Share this code with your colleague:</p>
+      <div class="room-code" id="display-room-code">----</div>
+
+      <ul class="player-list" id="waiting-player-list"></ul>
+
+      <p class="waiting-text" id="waiting-text">Waiting for another player...</p>
+
+      <button class="btn btn-primary" id="btn-start" style="display: none;">
+        🚀 Start Game!
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── Game Screen ─── -->
+  <div id="game-screen" class="screen">
+    <div class="game-header" id="game-header"></div>
+
+    <span class="difficulty-badge easy" id="difficulty-badge">EASY</span>
+
+    <div class="bomb-area">
+      <div class="syllable-prompt" id="syllable-prompt">---</div>
+      <div class="bomb-visual">
+        <svg class="timer-ring" viewBox="0 0 140 140">
+          <circle class="bg" cx="70" cy="70" r="60"/>
+          <circle class="progress" id="timer-progress" cx="70" cy="70" r="60"
+                  stroke-dasharray="377" stroke-dashoffset="0"/>
+        </svg>
+        <span class="bomb-emoji" id="bomb-emoji">💣</span>
+      </div>
+      <span class="timer-text" id="timer-text">12</span>
+    </div>
+
+    <p class="turn-indicator" id="turn-indicator">...</p>
+
+    <div class="word-input-area">
+      <div class="word-input-wrapper">
+        <input type="text" id="word-input" placeholder="Type a word..."
+               maxlength="30" autocomplete="off" autocapitalize="none" spellcheck="false">
+      </div>
+      <p class="word-feedback" id="word-feedback"></p>
+    </div>
+
+    <div class="word-log" id="word-log"></div>
+  </div>
+
+  <!-- ─── Game Over Screen ─── -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-card">
+      <h2>🎉 Game Over!</h2>
+      <p class="winner" id="winner-text">Winner wins!</p>
+      <button class="btn btn-primary" id="btn-play-again">🔄 Play Again</button>
+      <button class="btn btn-secondary" id="btn-back-lobby"
+              style="margin-top: 0.5rem;">🏠 Back to Lobby</button>
+    </div>
+  </div>
+
+  <!-- ─── Explosion Overlay ─── -->
+  <div class="explosion-overlay" id="explosion-overlay">
+    <div class="explosion-text">💥</div>
+    <p class="explosion-info" id="explosion-info"></p>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // ─── Elements ───
+    const $ = id => document.getElementById(id);
+    const screens = {
+      lobby: $('lobby-screen'),
+      waiting: $('waiting-screen'),
+      game: $('game-screen'),
+      gameover: $('gameover-screen'),
+    };
+
+    let myName = '';
+    let roomCode = '';
+    let myIndex = -1;
+    let totalTimer = 12;
+    const CIRCUMFERENCE = 2 * Math.PI * 60; // timer ring
+
+    function showScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+    }
+
+    // ─── Lobby ───
+    $('btn-create').onclick = () => {
+      myName = $('player-name').value.trim();
+      if (!myName) { $('lobby-error').textContent = 'Enter your name first!'; return; }
+      $('lobby-error').textContent = '';
+
+      socket.emit('createRoom', myName, (res) => {
+        if (res.success) {
+          roomCode = res.code;
+          $('display-room-code').textContent = roomCode;
+          showScreen('waiting');
+        }
+      });
+    };
+
+    $('btn-join').onclick = () => {
+      myName = $('player-name').value.trim();
+      const code = $('room-code-input').value.trim().toUpperCase();
+      if (!myName) { $('lobby-error').textContent = 'Enter your name first!'; return; }
+      if (!code || code.length !== 4) { $('lobby-error').textContent = 'Enter a 4-letter room code!'; return; }
+      $('lobby-error').textContent = '';
+
+      socket.emit('joinRoom', { code, name: myName }, (res) => {
+        if (res.success) {
+          roomCode = res.code;
+          $('display-room-code').textContent = roomCode;
+          showScreen('waiting');
+        } else {
+          $('lobby-error').textContent = res.error;
+        }
+      });
+    };
+
+    // Enter key on room code input
+    $('room-code-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') $('btn-join').click();
+    });
+
+    $('player-name').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') $('btn-create').click();
+    });
+
+    // ─── Waiting Room ───
+    $('btn-start').onclick = () => socket.emit('startGame', roomCode);
+
+    // ─── Game State Updates ───
+    socket.on('gameState', (state) => {
+      roomCode = state.code;
+      myIndex = state.players.findIndex(p => p.name === myName);
+      totalTimer = state.timerSeconds;
+
+      if (state.state === 'waiting') {
+        // Update waiting room
+        const list = $('waiting-player-list');
+        list.innerHTML = state.players.map(p =>
+          `<li><span>${p.name}</span><span class="lives">${'❤️'.repeat(p.lives)}</span></li>`
+        ).join('');
+
+        if (state.players.length >= 2) {
+          $('waiting-text').textContent = 'Ready to go!';
+          $('btn-start').style.display = 'block';
+        } else {
+          $('waiting-text').textContent = 'Waiting for another player...';
+          $('btn-start').style.display = 'none';
+        }
+        if (screens.game.classList.contains('active') || screens.gameover.classList.contains('active')) {
+          showScreen('waiting');
+        }
+      }
+
+      if (state.state === 'playing') {
+        showScreen('game');
+
+        // Update player cards
+        $('game-header').innerHTML = state.players.map((p, i) =>
+          `<div class="player-card ${i === state.currentTurn ? 'active-turn' : ''}">
+            <div class="name">${p.name}</div>
+            <div class="hearts">${'❤️'.repeat(p.lives)}${'🖤'.repeat(3 - p.lives)}</div>
+          </div>`
+        ).join('');
+
+        // Syllable
+        $('syllable-prompt').textContent = state.currentSyllable;
+
+        // Difficulty badge
+        const badge = $('difficulty-badge');
+        badge.textContent = state.difficulty.toUpperCase();
+        badge.className = `difficulty-badge ${state.difficulty}`;
+
+        // Turn indicator
+        const isMyTurn = state.currentTurn === myIndex;
+        const indicator = $('turn-indicator');
+        indicator.textContent = isMyTurn ? "⚡ YOUR TURN — type fast!" : `Waiting for ${state.players[state.currentTurn].name}...`;
+        indicator.className = `turn-indicator ${isMyTurn ? 'your-turn' : ''}`;
+
+        // Input
+        const input = $('word-input');
+        input.disabled = !isMyTurn;
+        if (isMyTurn) {
+          input.value = '';
+          input.focus();
+        }
+        $('word-feedback').textContent = '';
+      }
+    });
+
+    // ─── Timer Tick ───
+    socket.on('tick', (remaining) => {
+      $('timer-text').textContent = remaining;
+
+      // Update ring
+      const progress = $('timer-progress');
+      const offset = CIRCUMFERENCE * (1 - remaining / totalTimer);
+      progress.style.strokeDashoffset = offset;
+      progress.classList.toggle('danger', remaining <= 3);
+
+      // Bomb wobble speed
+      $('bomb-emoji').classList.toggle('fast', remaining <= 3);
+    });
+
+    // ─── Word Submission ───
+    $('word-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const word = $('word-input').value.trim();
+        if (word) {
+          socket.emit('submitWord', { code: roomCode, word });
+        }
+      }
+    });
+
+    socket.on('wordResult', ({ valid, reason }) => {
+      const fb = $('word-feedback');
+      fb.textContent = reason;
+      fb.className = `word-feedback ${valid ? 'success' : 'error'}`;
+
+      // Shake input on error
+      if (!valid) {
+        const input = $('word-input');
+        input.style.animation = 'none';
+        input.offsetHeight; // trigger reflow
+        input.style.animation = 'shake 0.3s ease-in-out';
+        input.select();
+      }
+    });
+
+    socket.on('wordAccepted', ({ word, player }) => {
+      const fb = $('word-feedback');
+      fb.textContent = `✅ ${player}: "${word}"`;
+      fb.className = 'word-feedback success';
+
+      // Add to word log
+      const log = $('word-log');
+      const entry = document.createElement('div');
+      entry.className = 'word-log-entry';
+      entry.innerHTML = `<span>${player}</span><span class="word">${word}</span>`;
+      log.prepend(entry);
+    });
+
+    // ─── Explosion ───
+    socket.on('explosion', ({ player, lives }) => {
+      const overlay = $('explosion-overlay');
+      $('explosion-info').textContent = `${player} ran out of time! (${lives} ${lives === 1 ? 'life' : 'lives'} left)`;
+      overlay.classList.add('active');
+      setTimeout(() => overlay.classList.remove('active'), 2000);
+    });
+
+    // ─── Game Over ───
+    socket.on('gameOver', ({ winner }) => {
+      setTimeout(() => {
+        $('winner-text').textContent = `🏆 ${winner} wins!`;
+        showScreen('gameover');
+      }, 2500);
+    });
+
+    $('btn-play-again').onclick = () => socket.emit('playAgain', roomCode);
+    $('btn-back-lobby').onclick = () => {
+      location.reload();
+    };
+
+    // ─── Player Left ───
+    socket.on('playerLeft', ({ name }) => {
+      $('word-feedback').textContent = `${name} disconnected!`;
+      $('word-feedback').className = 'word-feedback error';
+    });
+
+    // ─── Add shake animation ───
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        75% { transform: translateX(8px); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>
