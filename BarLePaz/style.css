@@ -40,6 +40,14 @@
   .title{font-family:"Poiret One", system-ui; font-size:22px;letter-spacing:1px;text-transform:uppercase;margin:0}
   .subtitle{margin:2px 0 0;font-size:12px;color:var(--muted)}
   
+  /* Event banner */
+  .event-link{
+    display:block;margin:0 16px 12px;padding:10px 14px;border-radius:14px;
+    background:linear-gradient(135deg, #ffad73, #ee7f2d);color:#1a120d;
+    font-weight:800;font-size:13px;text-decoration:none;text-align:center;
+    box-shadow:var(--shadow);
+  }
+
   /* Search */
   .searchbar{display:flex;gap:10px;padding:10px 16px 14px}
   .searchbar input{

@@ -62,25 +62,34 @@ const cocktails = [
     "Passoa - Passionfruit Liqueur",
     "Tia Maria",
     "Raspberry Liqueur",
-    "Absolut Vanilla Vodka",
+    "Absolut Vanilla Vodka [out of stock]",
     "Whitley Neill Japanese Yuzu & Strawberry Gin",
     "Sierra Tequila Blanco",
-    "Out of Stock - Lambs Spiced Rum",
-    "Licor 43",
+    "Lambs Spiced Rum",
+    "Edinburgh Gin Distillery - Rhubarb & Ginger Liqueur Gin",
     "Kraken Black Spiced Rum - Dark Caramel & Sea Salt",
     "Kraken Black Spiced Rum - Cherry & Madagascan Vanilla",
-    "Baileys Extra Light Cream Liqueur",
-    "Advocaat",
+    "Kraken Black Spiced Rum - Original",
+    "Brandy",
   ];
   
   const mixers = [
     "Strawberry syrup",
     "Raspberry syrup",
-    "Coke",
+    "Coke Zero",
     "Slimline Ginger Ale",
     "Apple, Watermelon & Strawberry Juice Drink",
-    "Pineapple & Coconut juice",
-    "Strawberry & Lemon juice",
+    "Don Simon - Pineapple & Coconut Juice",
+    "Don Simon - Strawberry & Lemon juice",
+  ];
+
+  const cordials = [
+    "Belvoir Farm - Rhubarb & Apple",
+    "Belvoir Farm - Blueberry & Blackcurrent",
+    "Belvoir Farm - Elderflower & Rose",
+    "Belvoir Farm - Honey, Lemon & Ginger",
+    "Bottle Green - Lime & Mint",
+    "Sainsbury's Fruit Blend - Cherry, Plum & Raspberry",
   ];
   
   // --- Helpers ---------------------------------------------------------------
