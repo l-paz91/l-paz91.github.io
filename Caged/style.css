@@ -1,0 +1,148 @@
+/* Caged - hand-coded in Notepad, circa 2002 (not really) */
+
+body {
+    background-color: #663300;
+    background-image: url("backgroundImage.jpg");
+    background-attachment: fixed;
+    color: #000000;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 16px;
+    margin: 0;
+    padding: 12px 0;
+}
+
+/* the big beige box everything lives in */
+table.main {
+    width: 90%;
+    max-width: 680px;
+    margin: 0 auto;
+    background-color: #FFFFCC;
+    border: 4px outset #CC9900;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+table.main td {
+    padding: 14px 18px;
+}
+
+h1 {
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+    font-size: 44px;
+    color: #CC0000;
+    text-align: center;
+    margin: 4px 0;
+    text-shadow: 3px 3px #FFCC00;
+}
+
+h2 {
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+    font-size: 22px;
+    color: #000099;
+    border-bottom: 2px dotted #000099;
+    margin: 22px 0 8px 0;
+}
+
+p, li {
+    line-height: 1.35;
+}
+
+li {
+    margin-bottom: 5px;
+}
+
+a:link    { color: #0000FF; }
+a:visited { color: #800080; }
+a:hover   { color: #FF0000; background-color: #FFFF00; }
+
+hr {
+    border: 0;
+    border-top: 3px ridge #CC9900;
+    height: 0;
+    margin: 18px 0;
+}
+
+.center {
+    text-align: center;
+}
+
+.tagline {
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+    text-align: center;
+    font-size: 18px;
+    color: #006600;
+    margin: 0 0 8px 0;
+}
+
+.blink {
+    animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+    to { visibility: hidden; }
+}
+
+.new {
+    color: #FF0000;
+    font-weight: bold;
+}
+
+marquee {
+    background-color: #000000;
+    color: #00FF00;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 15px;
+    padding: 3px 0;
+    border: 2px inset #999999;
+}
+
+/* the "ooh look at my box" boxes */
+.box {
+    background-color: #FFFFFF;
+    border: 3px ridge #999999;
+    padding: 8px 14px;
+    margin: 10px 0;
+}
+
+.warn {
+    background-color: #FFFF99;
+    border: 3px double #CC0000;
+    padding: 8px 14px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.tldr {
+    background-color: #CCFFCC;
+    border: 3px ridge #009900;
+    padding: 8px 14px;
+    margin: 10px 0 16px 0;
+}
+
+.updated {
+    font-size: 13px;
+    color: #666666;
+    text-align: center;
+}
+
+.badge {
+    display: inline-block;
+    background-color: #C0C0C0;
+    border: 2px outset #FFFFFF;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    padding: 2px 6px;
+    margin: 2px;
+}
+
+.footer {
+    font-size: 13px;
+    text-align: center;
+    color: #333333;
+}
+
+@media (max-width: 480px) {
+    h1 { font-size: 34px; }
+    table.main { width: 96%; }
+    table.main td { padding: 10px 12px; }
+}
